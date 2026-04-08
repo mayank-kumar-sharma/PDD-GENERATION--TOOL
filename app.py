@@ -9,9 +9,9 @@ import time
 # -----------------------------
 # Config / API
 # -----------------------------
-GEMINI_API_KEY = "AIzaSyB1ZfX-LSaWQ1kEqpP8LCdcRZj6ym-Yty8"
+GEMINI_API_KEY = "AIzaSyDT1B7GTkk-dtEoGBwTj2jsBGRLzD9OnDI"
 genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-2.0-flash")
+model = genai.GenerativeModel("gemini-2.0-flash-lite")
 
 # -----------------------------
 # Page Config & Custom CSS
@@ -441,17 +441,22 @@ Output format:
 # -----------------------------
 # Gemini API Call
 # -----------------------------
-def call_gemini(prompt, retries=3):
-    """Call Gemini API with retry logic."""
+def call_gemini(prompt, retries=5):
+    """Call Gemini API with smart retry logic for rate limits."""
     for attempt in range(retries):
         try:
             response = model.generate_content(prompt)
             return response.text.strip()
         except Exception as e:
-            if attempt < retries - 1:
-                time.sleep(2)
+            error_msg = str(e)
+            if "429" in error_msg or "quota" in error_msg.lower() or "rate" in error_msg.lower():
+                wait_time = 60 * (attempt + 1)
+                st.warning(f"Rate limit hit — waiting {wait_time}s before retry (attempt {attempt+1}/{retries})...")
+                time.sleep(wait_time)
+            elif attempt < retries - 1:
+                time.sleep(3)
             else:
-                return f"[Error generating this section: {str(e)}]"
+                return f"[Error generating this section: {error_msg}]"
 
 # -----------------------------
 # PDD Assembly
