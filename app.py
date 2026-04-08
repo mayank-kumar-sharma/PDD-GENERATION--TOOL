@@ -1,5 +1,5 @@
 import streamlit as st
-import google.generativeai as genai
+from groq import Groq
 from docx import Document
 from docx.shared import Pt, RGBColor, Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -9,9 +9,8 @@ import time
 # -----------------------------
 # Config / API
 # -----------------------------
-GEMINI_API_KEY = "AIzaSyDT1B7GTkk-dtEoGBwTj2jsBGRLzD9OnDI"
-genai.configure(api_key=GEMINI_API_KEY)
-model = genai.GenerativeModel("gemini-2.0-flash-lite")
+GROQ_API_KEY = "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"
+client = Groq(api_key=GROQ_API_KEY)
 
 # -----------------------------
 # Page Config & Custom CSS
@@ -442,19 +441,24 @@ Output format:
 # Gemini API Call
 # -----------------------------
 def call_gemini(prompt, retries=5):
-    """Call Gemini API with smart retry logic for rate limits."""
+    """Call Groq API with smart retry logic for rate limits."""
     for attempt in range(retries):
         try:
-            response = model.generate_content(prompt)
-            return response.text.strip()
+            response = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.3,
+                max_tokens=1024,
+            )
+            return response.choices[0].message.content.strip()
         except Exception as e:
             error_msg = str(e)
             if "429" in error_msg or "quota" in error_msg.lower() or "rate" in error_msg.lower():
-                wait_time = 60 * (attempt + 1)
+                wait_time = 30 * (attempt + 1)
                 st.warning(f"Rate limit hit — waiting {wait_time}s before retry (attempt {attempt+1}/{retries})...")
                 time.sleep(wait_time)
             elif attempt < retries - 1:
-                time.sleep(3)
+                time.sleep(2)
             else:
                 return f"[Error generating this section: {error_msg}]"
 
