@@ -339,17 +339,19 @@ Write the "Baseline Scenario" section of the PDD.
 
 Include:
 - Description of what would happen to the feedstock without this project
-- Greenhouse gas emissions associated with the baseline scenario
-- Why this baseline is realistic and representative
-- Quantitative or qualitative emissions argument
+- Specific GHG emissions associated with the baseline (CO2, CH4, N2O — explain each gas and why it is released)
+- Indicative emission ranges or factors where exact data is unavailable (e.g. IPCC emission factors for open burning)
+- Why this baseline is realistic, evidence-based and representative of regional practice
+- Explanation of why no better alternative waste management exists
 
 {build_input_block(data)}
 
 Ensure:
-- Baseline matches the selected scenario exactly
-- GHG emissions are explained logically (CO2, CH4, N2O where relevant)
-- Justification is grounded in the provided reasoning
-- Avoid generic or vague statements
+- Never say "it can be assumed" — instead say "based on IPCC guidelines" or "field studies indicate" or "regional practice confirms"
+- Provide qualitative reasoning with indicative ranges where exact data is unavailable
+- GHG emissions must be explained with conviction — name the gases, explain the combustion chemistry briefly
+- Justification must sound evidence-based, not generic
+- Show that the baseline is the most realistic counterfactual — not just the easiest one
 
 Output format:
 - Use clear subheadings where appropriate
@@ -364,18 +366,21 @@ def prompt_emissions_leakage(data):
 Write the "Emissions and Leakage Assessment" section of the PDD.
 
 Include:
-- Project activity emissions (transport, fossil energy use)
-- Leakage risks and how they are managed
-- Net emissions calculation approach
-- Any fossil fuel inputs and their GHG implications
+- System boundary definition: clearly state what is inside and outside the project boundary
+- Emission sources identification: list each source (transport, energy, process) and state whether included or excluded and why
+- Transport emissions: estimate qualitatively using distance, fuel type and typical diesel emission factors (approx 2.68 kg CO2 per litre)
+- Fossil energy inputs and their GHG implications
+- Leakage risks: explain the risk level with specific reasoning, not just a label
+- Net emissions approach: describe how gross removal minus project emissions minus leakage equals net removal
 
 {build_input_block(data)}
 
 Ensure:
-- All emission sources are identified and addressed
-- Leakage risk level is explained with reasoning
-- Transport emissions are quantified qualitatively based on distance and fuel type
-- Honest assessment — do not minimize risks without justification
+- Structure the section with clear emission source boundaries (included vs excluded)
+- Do not just say emissions exist — explain magnitude qualitatively with indicative factors
+- Leakage reasoning must be specific to this project type, feedstock and end use
+- Honest assessment — if leakage risk is low, explain exactly why, not just state it
+- Avoid surface-level statements like "transport emissions contribute to footprint"
 
 Output format:
 - Use clear subheadings where appropriate
@@ -390,18 +395,21 @@ def prompt_additionality(data):
 Write the "Additionality" section of the PDD.
 
 Include:
-- Assessment of financial viability without carbon revenue
-- Identification of key barriers (financial, technological, market)
-- Role of carbon finance in enabling the project
-- Argument for why the project would not occur under business-as-usual
+- Financial barrier analysis: explain the cost vs revenue gap qualitatively — high CAPEX, operational costs, and why biochar sales revenue alone is insufficient
+- Barrier identification: describe each barrier (financial, technological, market) with specific reasoning for this project type and region
+- Investment gap argument: explain what the carbon revenue covers and why without it the IRR or payback period is not commercially acceptable
+- Common practice test: confirm whether biochar production via slow pyrolysis is common practice in this region and why it is not
+- Role of carbon finance: explain precisely how Puro.earth carbon revenue bridges the viability gap
+- Business-as-usual argument: explain what would actually happen without the project — feedstock burned, no biochar produced, no carbon removed
 
 {build_input_block(data)}
 
 Ensure:
-- Additionality argument is logical and structured
-- Barriers are specific — avoid exaggerated or unsubstantiated claims
-- Carbon revenue is clearly positioned as the enabling factor
-- Aligns with standard additionality reasoning used in carbon markets
+- Avoid generic statements like "project not viable without carbon revenue" — explain the cost-revenue dynamics
+- The argument must feel grounded — reference CAPEX intensity of pyrolysis plants, lack of biochar market in region if applicable
+- Common practice test must be explicitly addressed
+- Carbon finance must be positioned as the decisive enabling factor with logical reasoning
+- Do not exaggerate barriers — be honest and specific
 
 Output format:
 - Use clear subheadings where appropriate
@@ -416,19 +424,22 @@ def prompt_monitoring_plan(data):
 Write the "Monitoring Plan" section of the PDD.
 
 Include:
-- Parameters to be monitored and why each is important
-- Monitoring frequency and schedule
-- Data collection and recording methods
-- Quality assurance and verification procedures
-- Roles and responsibilities for monitoring
+- Parameters monitored: for each parameter explain what it measures, why it is critical for the carbon removal claim, and what happens if it deviates
+- Monitoring frequency and schedule: justify why this frequency is sufficient for verification
+- Data collection method: describe the recording process in detail — how data is captured, stored, and protected from tampering
+- QA/QC procedures: describe calibration schedules for measurement equipment, cross-checks, and how errors are identified and corrected
+- Audit trail: explain how data records are maintained for third-party verification — version control, access logs, backup procedures
+- Roles and responsibilities: name the responsible party for each monitoring activity
+- Verification readiness: explain how this monitoring plan supports independent verification by a VVB (Validation and Verification Body)
 
 {build_input_block(data)}
 
 Ensure:
-- All monitored parameters are clearly explained
-- Monitoring approach supports verifiability
-- Data recording method is described with enough detail
-- Aligned with Puro.earth verification requirements
+- Do not just list parameters — explain why each one matters for the carbon removal claim
+- QA/QC section must be specific — mention calibration frequency, acceptable deviation ranges, corrective actions
+- Audit trail must be described — a verifier needs to trust the data chain
+- Monitoring plan must feel like it was written for a verifier, not a developer
+- Avoid generic statements like "parameters will be recorded" — describe the actual process
 
 Output format:
 - Use clear subheadings where appropriate
@@ -448,7 +459,7 @@ def call_gemini(prompt, retries=5):
                 model="llama-3.3-70b-versatile",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.3,
-                max_tokens=1024,
+                max_tokens=1500,
             )
             return response.choices[0].message.content.strip()
         except Exception as e:
