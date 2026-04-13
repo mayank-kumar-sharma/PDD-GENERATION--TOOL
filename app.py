@@ -9,7 +9,9 @@ import time
 # -----------------------------
 # Config / API
 # -----------------------------
-GROQ_API_KEY = "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"
+import os
+
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 client = Groq(api_key=GROQ_API_KEY)
 
 # -----------------------------
